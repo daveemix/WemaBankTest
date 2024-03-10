@@ -2,15 +2,16 @@
 using MediatR;
 using System.ComponentModel.DataAnnotations;
 using WemaCustomer.Application.Data;
+using WemaCustomer.Application.Data.Models;
 
 namespace WemaCustomer.Application.Features.Commands
 {
     public class CompleteOnboardingHandler : IRequestHandler<CompleteOnboardingRequest, ApiResponse<CompleteOnboardingResponse>>
     {
-        private readonly ApplicationDbContext _context;
+        private readonly wemaDBContext _context;
         private readonly ILogger<CompleteOnboardingHandler> _logger;
 
-        public CompleteOnboardingHandler(ApplicationDbContext context, ILogger<CompleteOnboardingHandler> logger)
+        public CompleteOnboardingHandler(wemaDBContext context, ILogger<CompleteOnboardingHandler> logger)
         {
             _context = context;
             _logger = logger;
@@ -28,7 +29,7 @@ namespace WemaCustomer.Application.Features.Commands
                     return new ApiResponse<CompleteOnboardingResponse>( "Customer not found.");
                 }
 
-                if (customer.OTP != request.Otp)
+                if (customer.Otp != request.Otp)
                 {
                     return new ApiResponse<CompleteOnboardingResponse>("Invalid OTP.");
                 }

@@ -6,6 +6,8 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using WemaCustomer.Application.Data.Dto;
+using Microsoft.Extensions.Options;
+using WemaCustomer.Helpers;
 
 namespace WemaCustomer.Application.Services
 {
@@ -20,13 +22,12 @@ namespace WemaCustomer.Application.Services
         private readonly ILogger<BankApiService> _logger;
         private readonly string _banksApiUrl;
 
-        public BankApiService(IHttpClientFactory httpClientFactory, ILogger<BankApiService> logger, IConfiguration configuration)
+        public BankApiService(IHttpClientFactory httpClientFactory, ILogger<BankApiService> logger, IOptions<BankApiSettings> options)
         {
             _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-            // Retrieve the BanksApiUrl from the configuration
-            _banksApiUrl = configuration["WemaApi:BanksApiUrl"];
+            _banksApiUrl = options.Value.BanksApiUrl;
         }
 
         public async Task<ApiResponse<BankApiResponse>> GetAllBanks()
@@ -36,13 +37,20 @@ namespace WemaCustomer.Application.Services
                 var client = _httpClientFactory.CreateClient();
                 client.BaseAddress = new Uri(_banksApiUrl);
 
-                var response = await client.GetAsync(""); // Assuming the endpoint is the base URL
+                client.Timeout = TimeSpan.FromSeconds(30); 
+
+                var response = await client.GetAsync(""); 
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync();
                 var apiResponse = JsonConvert.DeserializeObject<BankApiResponse>(content);
 
                 return new ApiResponse<BankApiResponse>(apiResponse);
+            }
+            catch (OperationCanceledException ex) when (ex.CancellationToken == CancellationToken.None)
+            {
+                _logger.LogError(ex, "Timeout occurred while retrieving bank information from the API.");
+                return new ApiResponse<BankApiResponse>("Timeout occurred while retrieving bank information from the API.");
             }
             catch (HttpRequestException ex)
             {

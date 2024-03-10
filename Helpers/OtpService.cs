@@ -7,7 +7,7 @@
         public static string GenerateOtp()
         {
             Random random = new Random();
-            int otpValue = random.Next(1000, 10000); // Range is 1000 to 9999 (inclusive)
+            int otpValue = random.Next(1000, 10000); 
             return otpValue.ToString();
         }
     }

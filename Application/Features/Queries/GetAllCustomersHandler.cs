@@ -6,16 +6,17 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using WemaCustomer.Application.Data;
+using WemaCustomer.Application.Data.Models;
 using WemaCustomer.Helpers;
 
 namespace WemaCustomer.Application.Features.Queries
 {
     public class GetAllCustomersHandler : IRequestHandler<GetAllCustomersRequest, ApiResponse<PaginatedList<Customer>>>
     {
-        private readonly ApplicationDbContext _context;
+        private readonly wemaDBContext _context;
         private readonly ILogger<GetAllCustomersHandler> _logger;
 
-        public GetAllCustomersHandler(ApplicationDbContext context, ILogger<GetAllCustomersHandler> logger)
+        public GetAllCustomersHandler(wemaDBContext context, ILogger<GetAllCustomersHandler> logger)
         {
             _context = context;
             _logger = logger;
@@ -28,6 +29,7 @@ namespace WemaCustomer.Application.Features.Queries
                 _logger.LogInformation("Fetching all customers...");
 
                 var query = _context.Customers.AsQueryable();
+                query = query.Where(x => x.IsOnboardingComplete == true);
 
                 var customers = await PaginatedList<Customer>.CreateAsync(query, request.PageNumber, request.PageSize);
 

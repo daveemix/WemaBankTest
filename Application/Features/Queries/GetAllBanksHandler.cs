@@ -8,7 +8,7 @@ using WemaCustomer.Helpers;
 
 namespace WemaCustomer.Application.Features.Queries
 {
-    public class GetAllBanksHandler : IRequestHandler<GetAllBanksRequest, ApiResponse<BankApiResponse>>
+    public class GetAllBanksHandler : IRequestHandler<GetAllBanksRequest, ApiResponse<List<BankInfo>>>
     {
         private readonly IBankApiService _bankApiService;
 
@@ -17,22 +17,22 @@ namespace WemaCustomer.Application.Features.Queries
             _bankApiService = bankApiService;
         }
 
-        public async Task<ApiResponse<BankApiResponse>> Handle(GetAllBanksRequest request, CancellationToken cancellationToken)
+        public async Task<ApiResponse<List<BankInfo>>> Handle(GetAllBanksRequest request, CancellationToken cancellationToken)
         {
             try
             {
                 var response = await _bankApiService.GetAllBanks();
-                return response;
+                return new ApiResponse<List<BankInfo>>(response.Data.Result); 
             }
             catch (Exception ex)
             {
-                return new ApiResponse<BankApiResponse>($"An error occurred: {ex.Message}");
+                return new ApiResponse<List<BankInfo>>($"An error occurred: {ex.Message}");
             }
         }
     }
 
 
-    public class GetAllBanksRequest : IRequest<ApiResponse<BankApiResponse>>
+    public class GetAllBanksRequest : IRequest<ApiResponse<List<BankInfo>>>
     {
     }
 

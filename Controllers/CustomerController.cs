@@ -84,7 +84,7 @@ namespace WemaCustomer.Controllers
 
             if (response.Success)
             {
-                return Ok(response.Data);
+                return Ok(response);
             }
             else
             {
